@@ -1,0 +1,5 @@
+record the student's hash 
+ente auth for instructor page?
+check = 1, uncheck = 1
+ip address?
+only available between tutorial time (5-6pm)

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Section Sign‑In</title>
+  <style>
+    :root{
+      --bg:#0b1020;--card:#121a33;--muted:#7b87a3;--text:#e9eef7;--acc:#7aa2ff;--danger:#ff6b6b;--ok:#4cd28a;--warn:#ffd166;
+    }
+    *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;background:linear-gradient(180deg,#0b1020,#0b0f1a);} 
+    header{position:sticky;top:0;background:rgba(11,16,32,.85);backdrop-filter: blur(6px);border-bottom:1px solid #1d2745;z-index:10}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    h1{color:var(--text);font-size:clamp(20px,4vw,28px);margin:0}
+    .sub{color:var(--muted);font-size:14px}
+    main{max-width:1100px;margin:18px auto;padding:0 16px 40px}
+    .card{background:var(--card);border:1px solid #1d2745;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    .grid{display:grid;grid-template-columns:1fr;gap:16px}
+    @media(min-width:880px){.grid{grid-template-columns:1.4fr .9fr}}
+    .list{padding:8px 0;max-height:70vh;overflow:auto;border-top-left-radius:16px;border-bottom-left-radius:16px}
+    .row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px dashed #1d2745}
+    .row:last-child{border-bottom:none}
+    .row span.name{flex:1;color:var(--text)}
+    .row small{color:var(--muted)}
+    .pill{font:12px/1.6 system-ui;padding:2px 8px;border-radius:999px;border:1px solid #2a386b;color:var(--muted)}
+    .ok{color:var(--ok);border-color:#2b6f54}
+    .btn{appearance:none;border:1px solid #2a386b;background:#172247;color:var(--text);padding:10px 14px;border-radius:12px;cursor:pointer}
+    .btn:hover{filter:brightness(1.1)}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .btn-danger{border-color:#6b2a2a;background:#3a0f12}
+    .btn-warn{border-color:#6b5b2a;background:#3a2f0f}
+    .btn-ghost{background:transparent;border-color:#1d2745}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap}
+    .hidden{display:none}
+    .table{width:100%;border-collapse:collapse}
+    .table th,.table td{padding:10px 8px;border-bottom:1px dashed #243159;text-align:left;color:var(--text);font-size:14px}
+    .table th{position:sticky;top:0;background:#101733;z-index:1}
+    .muted{color:var(--muted)}
+    code,kbd{background:#101733;border:1px solid #243159;color:#c3d1ff;border-radius:6px;padding:0 6px}
+    .foot{color:var(--muted);font-size:12px;margin-top:8px}
+    .search{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #243159;background:#0f1731;color:var(--text)}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div>
+        <h1>Section Sign‑In</h1>
+        <div class="sub">Check‑in limited to one check and one uncheck per student.</div>
+      </div>
+      <div class="toolbar">
+        <button class="btn" id="instructorBtn" title="Instructor dashboard">Instructor Sign In</button>
+        <button class="btn btn-ghost" id="exportBtn" title="Export current log (CSV)">Export CSV</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid">
+      <!-- Student List -->
+      <section class="card">
+        <div style="padding:14px 14px 0;display:flex;gap:8px;align-items:center;justify-content:space-between">
+          <input id="search" class="search" placeholder="Search students…" />
+          <div class="pill"><span id="remainingInfo">—</span></div>
+        </div>
+        <div id="studentList" class="list" aria-live="polite"></div>
+        <div style="padding:12px 14px" class="foot">A student can toggle at most twice (check → uncheck). Further changes are locked. Ask instructor for a reset.</div>
+      </section>
+
+      <!-- Instructor Dashboard -->
+      <aside class="card" id="instructorPanel" aria-hidden="true">
+        <div style="padding:14px 14px 0;display:flex;align-items:center;justify-content:space-between">
+          <h3 style="color:var(--text);margin:0">Instructor Dashboard</h3>
+          <div class="toolbar">
+            <button id="resetAll" class="btn btn-danger">Reset All</button>
+            <button id="signOut" class="btn btn-ghost">Sign Out</button>
+          </div>
+        </div>
+        <div style="padding:8px 14px 0" class="muted">Shows latest status, timestamps, and hashes for each submission.</div>
+        <div style="padding:8px 14px 14px;max-height:70vh;overflow:auto">
+          <table class="table" id="insTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Status</th>
+                <th>Check Time</th>
+                <th>Check Hash</th>
+                <th>Uncheck Time</th>
+                <th>Uncheck Hash</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Modal for Instructor Sign In -->
+  <dialog id="authModal" style="border:none;border-radius:14px;padding:0;background:#0f1731;color:var(--text);">
+    <form method="dialog" style="padding:18px 18px 12px;min-width:320px">
+      <h3 style="margin:0 0 8px">Instructor Sign In</h3>
+      <div class="muted" style="margin-bottom:10px">Enter passphrase to access resets and logs.</div>
+      <input id="pass" type="password" placeholder="Passphrase" class="search" autofocus />
+      <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
+        <button class="btn btn-ghost" value="cancel">Cancel</button>
+        <button id="authGo" class="btn" value="go">Sign In</button>
+      </div>
+      <div id="authHint" class="foot">Default passphrase: <code>instructor</code> (change in source: <code>PASSPHRASE</code>).</div>
+    </form>
+  </dialog>
+
+<script src="main.js"> </script>
+</body>
+</html>
