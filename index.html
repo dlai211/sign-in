@@ -39,6 +39,7 @@
     code,kbd{background:#101733;border:1px solid #243159;color:#c3d1ff;border-radius:6px;padding:0 6px}
     .foot{color:var(--muted);font-size:12px;margin-top:8px}
     .search{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #243159;background:#0f1731;color:var(--text)}
+    .banner{padding:10px 14px;background:#3a2f0f;color:var(--warn);border-bottom:1px solid #6b5b2a}
   </style>
 </head>
 <body>
@@ -46,14 +47,15 @@
     <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
       <div>
         <h1>Section Sign‑In</h1>
-        <div class="sub">Check‑in limited to one check and one uncheck per student.</div>
+        <div class="sub">One check per device. No unchecks. Available only 5–6pm.</div>
       </div>
       <div class="toolbar">
         <button class="btn" id="instructorBtn" title="Instructor dashboard">Instructor Sign In</button>
-        <button class="btn btn-ghost" id="exportBtn" title="Export current log (CSV)">Export CSV</button>
       </div>
     </div>
   </header>
+
+  <div id="timeBanner" class="banner hidden">Sign‑in is closed. Allowed time: 5:00–6:00 pm.</div>
 
   <main>
     <div class="grid">
@@ -64,7 +66,7 @@
           <div class="pill"><span id="remainingInfo">—</span></div>
         </div>
         <div id="studentList" class="list" aria-live="polite"></div>
-        <div style="padding:12px 14px" class="foot">A student can toggle at most twice (check → uncheck). Further changes are locked. Ask instructor for a reset.</div>
+        <div style="padding:12px 14px" class="foot">A device can submit exactly once. If you checked the wrong name, contact the instructor to reset.</div>
       </section>
 
       <!-- Instructor Dashboard -->
@@ -76,7 +78,7 @@
             <button id="signOut" class="btn btn-ghost">Sign Out</button>
           </div>
         </div>
-        <div style="padding:8px 14px 0" class="muted">Shows latest status, timestamps, and hashes for each submission.</div>
+        <div style="padding:8px 14px 0" class="muted">Shows latest status, timestamp, and hashes. Public IP capture requires a backend.</div>
         <div style="padding:8px 14px 14px;max-height:70vh;overflow:auto">
           <table class="table" id="insTable">
             <thead>
@@ -84,9 +86,9 @@
                 <th>Name</th>
                 <th>Status</th>
                 <th>Check Time</th>
-                <th>Check Hash</th>
-                <th>Uncheck Time</th>
-                <th>Uncheck Hash</th>
+                <th>Time Hash</th>
+                <th>Device Hash</th>
+                <th>IP</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -107,10 +109,283 @@
         <button class="btn btn-ghost" value="cancel">Cancel</button>
         <button id="authGo" class="btn" value="go">Sign In</button>
       </div>
-      <div id="authHint" class="foot">Default passphrase: <code>instructor</code> (change in source: <code>PASSPHRASE</code>).</div>
+      <div id="authHint" class="foot"></div>
     </form>
   </dialog>
 
-<script src="main.js"> </script>
+<script>
+/***********************
+ * CONFIG
+ ***********************/
+const PASSPHRASE = 'instructor'; // 🔒 Replace for real use
+const SITE_SALT = 'uO-section-2025-10-02'; // used in hash generation
+const DEVICE_LOCK_KEY = 'section.signin.device.locked.name';
+const STORAGE_KEY = 'section.signin.v2';
+
+// Allowed sign-in window (5–6pm local time). Adjust if needed.
+const WINDOW_START_HOUR = 16; // 5pm
+const WINDOW_END_HOUR   = 18; // 6pm (exclusive)
+
+// Student roster
+const STUDENTS = [
+  "Acuna, Alana","Autar, Akash","Barnes, Aj","Bertelsen, Hailey","Bradshaw, Charlie","Cook Diaz, Rowan","Cooper, Mikala","Corcoran, Nick","Craddock, Yun","De Leon, Isaiah","Dennis, Kelsey","Ellorin, Ysabella","Enright, Taylor","Finemel, Annie","Freed, Drake","Friel, Liem","Fulk, Logan","Gomez-Chan, Fabiola","Hacker, Connor","Hansen, Reese","Hines, Nadia","Hussein, Rima","Kendall, Ava","Khanna, Ananya","Krueger, Tessa","Lage, Adeline","Lambo, Dexter","Lara, Diego","Lara, Victor","Leach, Gwendolynn","Lebo, Rachel","Lilly, Genevieve","Lucas, Grae","Maher, Kyle","Martin, Lea","Martinez, Marina","McDonald, Cam'Ron","Mehta, Jhil","Mosolgo, Anabella","Narbaez, Adrien","Nollette, Isabelle","Owens, Richie","Palmer, B J","Partain, Adrian","Petitt, McKenzie","Printz, Dane","Quizon, Ivanna","Rathore, Max","Roan, Dana","Robin, Aidan","Rook, Cassidy","Roscher, Wyatt","Rueter, Rochelle","Rutan, Triston","Sanada, Maia","Schmidt, Thomas","Schmitt, Eliot","Shaft, Isabella","Shepler, Izzy","Silvia, Noah","Spengler, Sascha","Tarbox, Michael","Toyooka, Luke","Uehara, Kierstin","Valdez, Bella","Walts, Benjamin","Watson, Magdalyn","Wenz, Kamryn","Winchester, Sierra","Wright, Jace"
+].map(s=>s.trim());
+
+/***********************
+ * STORAGE
+ ***********************/
+const load = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+const save = (obj) => localStorage.setItem(STORAGE_KEY, JSON.stringify(obj));
+
+function emptyRecord(name){
+  return { name, status: 'unchecked', checkTime: null, timeHash: null, deviceHash: null, ip: null };
+}
+
+/***********************
+ * CRYPTO HELPERS
+ ***********************/
+async function sha256Hex(str){
+  const enc = new TextEncoder();
+  const buf = await crypto.subtle.digest('SHA-256', enc.encode(str));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function buildDeviceHash(){
+  const ua = navigator.userAgent || '';
+  const plat = navigator.platform || '';
+  const lang = navigator.language || '';
+  return await sha256Hex(`${SITE_SALT}|device|${ua}|${plat}|${lang}`);
+}
+
+async function buildTimeHash(name, iso){
+  return await sha256Hex(`${SITE_SALT}|time|${name}|${iso}`);
+}
+
+/***********************
+ * TIME WINDOW CONTROL
+ ***********************/
+function withinWindow(date=new Date()){
+  const h = date.getHours();
+  return h >= WINDOW_START_HOUR && h < WINDOW_END_HOUR;
+}
+
+function updateWindowUI(){
+  const open = withinWindow();
+  document.getElementById('timeBanner').classList.toggle('hidden', open);
+}
+
+/***********************
+ * RENDER: STUDENT LIST
+ ***********************/
+const listEl = document.getElementById('studentList');
+const remainingInfo = document.getElementById('remainingInfo');
+
+function renderList(filter=''){
+  const db = load();
+  const q = filter.toLowerCase();
+  listEl.innerHTML = '';
+  const frag = document.createDocumentFragment();
+
+  const lockedName = localStorage.getItem(DEVICE_LOCK_KEY);
+  const windowOpen = withinWindow();
+
+  STUDENTS.filter(n=>n.toLowerCase().includes(q)).forEach((name, idx) => {
+    const rec = db[name] || emptyRecord(name);
+    const row = document.createElement('div');
+    row.className = 'row';
+
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = rec.status === 'checked';
+
+    // Disable if outside time window, already checked someone else on this device, or this record already checked
+    cb.disabled = !windowOpen || (lockedName && lockedName !== name) || rec.status === 'checked';
+    cb.id = `cb-${idx}`;
+
+    cb.addEventListener('change', async () => {
+      // Only allow check ONCE; no unchecking
+      if(!cb.checked){
+        cb.checked = true; // snap back
+        alert('Unchecking is not allowed. Contact instructor for a reset.');
+        return;
+      }
+
+      // Enforce device lock
+      const deviceLockedName = localStorage.getItem(DEVICE_LOCK_KEY);
+      if(deviceLockedName && deviceLockedName !== name){
+        cb.checked = false;
+        alert('This device has already checked someone. You cannot check more than one person.');
+        return;
+      }
+
+      const now = new Date();
+      if(!withinWindow(now)){
+        cb.checked = false;
+        alert('Sign‑in is only available 5–6pm.');
+        return;
+      }
+
+      const iso = now.toISOString();
+      const newDB = load();
+      const r = newDB[name] || emptyRecord(name);
+
+      r.status = 'checked';
+      r.checkTime = iso;
+      r.timeHash = await buildTimeHash(name, iso);
+      r.deviceHash = await buildDeviceHash();
+      // r.ip remains null here; needs backend to populate reliably
+
+      newDB[name] = r; save(newDB);
+      localStorage.setItem(DEVICE_LOCK_KEY, name);
+
+      refreshInstructor();
+      renderList(document.getElementById('search').value);
+    });
+
+    const label = document.createElement('label');
+    label.htmlFor = cb.id;
+    label.style.display = 'contents';
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'name';
+    nameSpan.textContent = name;
+
+    const status = document.createElement('small');
+    status.innerHTML = rec.status === 'checked' ? '<span class="pill ok">checked</span>' : '<span class="pill">not checked</span>';
+
+    const left = document.createElement('small');
+    left.className = 'muted';
+    left.textContent = lockedName && lockedName !== name ? 'device locked' : (withinWindow() ? '' : 'closed');
+
+    row.append(cb, label, nameSpan, status, left);
+    frag.appendChild(row);
+  });
+  listEl.appendChild(frag);
+
+  const totalChecked = STUDENTS.reduce((acc,n)=>{const r=(load()[n]||emptyRecord(n));return acc + (r.status==='checked');},0);
+  remainingInfo.textContent = `${totalChecked} checked / ${STUDENTS.length}`;
+}
+
+/*************************
+ * INSTRUCTOR DASHBOARD
+ *************************/
+const insPanel = document.getElementById('instructorPanel');
+const insTBody = document.querySelector('#insTable tbody');
+
+function renderInsRow(rec){
+  const tr = document.createElement('tr');
+  const fmt = (iso)=> iso? new Date(iso).toLocaleString(): '';
+  tr.innerHTML = `
+    <td>${rec.name}</td>
+    <td>${rec.status === 'checked' ? '<span class="pill ok">checked</span>' : '<span class="pill">not checked</span>'}</td>
+    <td class="muted">${fmt(rec.checkTime)}</td>
+    <td><code>${rec.timeHash ? rec.timeHash.slice(0,12)+'…' : ''}</code></td>
+    <td><code>${rec.deviceHash ? rec.deviceHash.slice(0,12)+'…' : ''}</code></td>
+    <td class="muted">${rec.ip || ''}</td>
+    <td>
+      <button class="btn btn-warn" data-act="reset" data-name="${rec.name}">Reset</button>
+    </td>`;
+  return tr;
+}
+
+function refreshInstructor(){
+  const db = load();
+  insTBody.innerHTML = '';
+  STUDENTS.forEach(name => {
+    const rec = db[name] || emptyRecord(name);
+    insTBody.appendChild(renderInsRow(rec));
+  });
+}
+
+// Delegate button clicks (per‑user reset)
+insTBody.addEventListener('click', e => {
+  const btn = e.target.closest('button[data-act="reset"]');
+  if(!btn) return;
+  const name = btn.getAttribute('data-name');
+  const db = load();
+  db[name] = emptyRecord(name);
+  save(db);
+  // If this device had locked this name, clear the device lock to allow a correction on THIS browser
+  const lockedName = localStorage.getItem(DEVICE_LOCK_KEY);
+  if(lockedName === name){
+    localStorage.removeItem(DEVICE_LOCK_KEY);
+  }
+  refreshInstructor();
+  renderList(document.getElementById('search').value);
+});
+
+// Reset all
+document.getElementById('resetAll').addEventListener('click', () => {
+  if(!confirm('Reset all students? This clears all statuses and hashes.')) return;
+  const db = {};
+  STUDENTS.forEach(n=>db[n]=emptyRecord(n));
+  save(db);
+  // Clear device lock for this browser
+  localStorage.removeItem(DEVICE_LOCK_KEY);
+  refreshInstructor();
+  renderList(document.getElementById('search').value);
+});
+
+/***********************
+ * AUTH MODAL
+ ***********************/
+const authModal = document.getElementById('authModal');
+const passInput = document.getElementById('pass');
+
+function requireAuth(){
+  authModal.showModal();
+  passInput.value='';
+  setTimeout(()=>passInput.focus(), 50);
+}
+
+function openInstructor(){
+  insPanel.classList.remove('hidden');
+  insPanel.setAttribute('aria-hidden','false');
+  refreshInstructor();
+}
+
+function closeInstructor(){
+  insPanel.classList.add('hidden');
+  insPanel.setAttribute('aria-hidden','true');
+}
+
+// Initial state: instructor panel hidden
+closeInstructor();
+
+// open modal
+document.getElementById('instructorBtn').addEventListener('click', requireAuth);
+
+// handle auth
+document.getElementById('authGo').addEventListener('click', (e) => {
+  e.preventDefault();
+  if(passInput.value === PASSPHRASE){
+    authModal.close();
+    openInstructor();
+  } else {
+    alert('Incorrect passphrase');
+  }
+});
+
+// sign out
+document.getElementById('signOut').addEventListener('click', closeInstructor);
+
+/***********************
+ * SEARCH + INIT + CLOCK
+ ***********************/
+const search = document.getElementById('search');
+search.addEventListener('input', (e)=> renderList(e.target.value));
+
+(function init(){
+  // Ensure all students exist in storage
+  const db = load();
+  let changed = false;
+  STUDENTS.forEach(n=>{ if(!db[n]){ db[n] = emptyRecord(n); changed = true; } });
+  if(changed) save(db);
+  updateWindowUI();
+  renderList();
+  // Update time banner every minute
+  setInterval(()=>{ updateWindowUI(); renderList(document.getElementById('search').value); }, 60_000);
+})();
+</script>
 </body>
 </html>

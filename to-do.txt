@@ -1,5 +1,6 @@
-record the student's hash 
+record the student's hash (time hash and device hash)
 ente auth for instructor page?
-check = 1, uncheck = 1
+check = 1, uncheck = 1 (using device hash)
 ip address?
 only available between tutorial time (5-6pm)
+get rid of 'export csv' buttons
