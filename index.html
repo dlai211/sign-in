@@ -6,40 +6,49 @@
   <title>Section Sign‑In</title>
   <style>
     :root{
-      --bg:#0b1020;--card:#121a33;--muted:#7b87a3;--text:#e9eef7;--acc:#7aa2ff;--danger:#ff6b6b;--ok:#4cd28a;--warn:#ffd166;
+      --bg:#F6FFF9;          /* light background */
+      --card:#FFFFFF;         /* card background */
+      --border:#DDE8E2;       /* light border */
+      --muted:#52636A;        /* subdued text */
+      --text:#0b1020;         /* main text */
+      --acc:#96CEB4;          /* primary accent (your light green) */
+      --danger:#C0392B;       /* danger */
+      --ok:#2E7D32;           /* success */
+      --warn:#B8860B;         /* warning */
     }
-    *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;background:linear-gradient(180deg,#0b1020,#0b0f1a);} 
-    header{position:sticky;top:0;background:rgba(11,16,32,.85);backdrop-filter: blur(6px);border-bottom:1px solid #1d2745;z-index:10}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial;background:linear-gradient(180deg,#E8F7F0,#F6FFF9);} 
+    header{position:sticky;top:0;background:rgba(255,255,255,.9);backdrop-filter: blur(6px);border-bottom:1px solid var(--border);z-index:10}
     .wrap{max-width:1100px;margin:0 auto;padding:16px}
     h1{color:var(--text);font-size:clamp(20px,4vw,28px);margin:0}
     .sub{color:var(--muted);font-size:14px}
     main{max-width:1100px;margin:18px auto;padding:0 16px 40px}
-    .card{background:var(--card);border:1px solid #1d2745;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.06)}
     .grid{display:grid;grid-template-columns:1fr;gap:16px}
     @media(min-width:880px){.grid{grid-template-columns:1.4fr .9fr}}
     .list{padding:8px 0;max-height:70vh;overflow:auto;border-top-left-radius:16px;border-bottom-left-radius:16px}
-    .row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px dashed #1d2745}
+    .row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px dashed var(--border)}
     .row:last-child{border-bottom:none}
     .row span.name{flex:1;color:var(--text)}
     .row small{color:var(--muted)}
-    .pill{font:12px/1.6 system-ui;padding:2px 8px;border-radius:999px;border:1px solid #2a386b;color:var(--muted)}
-    .ok{color:var(--ok);border-color:#2b6f54}
-    .btn{appearance:none;border:1px solid #2a386b;background:#172247;color:var(--text);padding:10px 14px;border-radius:12px;cursor:pointer}
-    .btn:hover{filter:brightness(1.1)}
+    .pill{font:12px/1.6 system-ui;padding:2px 8px;border-radius:999px;border:1px solid var(--acc);color:#245c49;background:rgba(150,206,180,.12)}
+    .ok{color:var(--ok);border-color:#8fd3a6;background:rgba(46,125,50,.08)}
+    .btn{appearance:none;border:1px solid #BEE3CF;background:#E7F5EE;color:var(--text);padding:10px 14px;border-radius:12px;cursor:pointer}
+    .btn:hover{filter:brightness(1.05)}
     .btn:disabled{opacity:.5;cursor:not-allowed}
-    .btn-danger{border-color:#6b2a2a;background:#3a0f12}
-    .btn-warn{border-color:#6b5b2a;background:#3a2f0f}
-    .btn-ghost{background:transparent;border-color:#1d2745}
+    .btn-danger{border-color:#F1B0A6;background:#FDEDEC;color:#8B2F24}
+    .btn-warn{border-color:#F1D7A7;background:#FFF7E6;color:#8A6D1D}
+    .btn-ghost{background:transparent;border-color:var(--border)}
     .toolbar{display:flex;gap:10px;flex-wrap:wrap}
     .hidden{display:none}
     .table{width:100%;border-collapse:collapse}
-    .table th,.table td{padding:10px 8px;border-bottom:1px dashed #243159;text-align:left;color:var(--text);font-size:14px}
-    .table th{position:sticky;top:0;background:#101733;z-index:1}
+    .table th,.table td{padding:10px 8px;border-bottom:1px dashed var(--border);text-align:left;color:var(--text);font-size:14px}
+    .table th{position:sticky;top:0;background:#F1FAF5;z-index:1}
     .muted{color:var(--muted)}
-    code,kbd{background:#101733;border:1px solid #243159;color:#c3d1ff;border-radius:6px;padding:0 6px}
+    code,kbd{background:#F1FAF5;border:1px solid var(--border);color:#1c3d2f;border-radius:6px;padding:0 6px}
     .foot{color:var(--muted);font-size:12px;margin-top:8px}
-    .search{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #243159;background:#0f1731;color:var(--text)}
-    .banner{padding:10px 14px;background:#3a2f0f;color:var(--warn);border-bottom:1px solid #6b5b2a}
+    .search{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#FFFFFF;color:var(--text)}
+    .banner{padding:10px 14px;background:#FFF7E6;color:#8A6D1D;border-bottom:1px solid #F1D7A7}
   </style>
 </head>
 <body>
@@ -109,7 +118,7 @@
         <button class="btn btn-ghost" value="cancel">Cancel</button>
         <button id="authGo" class="btn" value="go">Sign In</button>
       </div>
-      <div id="authHint" class="foot"></div>
+      <div id="authHint" class="foot">Default passphrase: <code>instructor</code> (change in source: <code>PASSPHRASE</code>).</div>
     </form>
   </dialog>
 
@@ -123,12 +132,87 @@ const DEVICE_LOCK_KEY = 'section.signin.device.locked.name';
 const STORAGE_KEY = 'section.signin.v2';
 
 // Allowed sign-in window (5–6pm local time). Adjust if needed.
-const WINDOW_START_HOUR = 16; // 5pm
+const WINDOW_START_HOUR = 17; // 5pm
 const WINDOW_END_HOUR   = 18; // 6pm (exclusive)
 
 // Student roster
+// const STUDENTS = [
+//   "Acuna, Alana","Autar, Akash","Barnes, Aj","Bertelsen, Hailey","Bradshaw, Charlie","Cook Diaz, Rowan","Cooper, Mikala","Corcoran, Nick","Craddock, Yun","De Leon, Isaiah","Dennis, Kelsey","Ellorin, Ysabella","Enright, Taylor","Finemel, Annie","Freed, Drake","Friel, Liem","Fulk, Logan","Gomez-Chan, Fabiola","Hacker, Connor","Hansen, Reese","Hines, Nadia","Hussein, Rima","Kendall, Ava","Khanna, Ananya","Krueger, Tessa","Lage, Adeline","Lambo, Dexter","Lara, Diego","Lara, Victor","Leach, Gwendolynn","Lebo, Rachel","Lilly, Genevieve","Lucas, Grae","Maher, Kyle","Martin, Lea","Martinez, Marina","McDonald, Cam'Ron","Mehta, Jhil","Mosolgo, Anabella","Narbaez, Adrien","Nollette, Isabelle","Owens, Richie","Palmer, B J","Partain, Adrian","Petitt, McKenzie","Printz, Dane","Quizon, Ivanna","Rathore, Max","Roan, Dana","Robin, Aidan","Rook, Cassidy","Roscher, Wyatt","Rueter, Rochelle","Rutan, Triston","Sanada, Maia","Schmidt, Thomas","Schmitt, Eliot","Shaft, Isabella","Shepler, Izzy","Silvia, Noah","Spengler, Sascha","Tarbox, Michael","Toyooka, Luke","Uehara, Kierstin","Valdez, Bella","Walts, Benjamin","Watson, Magdalyn","Wenz, Kamryn","Winchester, Sierra","Wright, Jace"
+// ].map(s=>s.trim());
+
 const STUDENTS = [
-  "Acuna, Alana","Autar, Akash","Barnes, Aj","Bertelsen, Hailey","Bradshaw, Charlie","Cook Diaz, Rowan","Cooper, Mikala","Corcoran, Nick","Craddock, Yun","De Leon, Isaiah","Dennis, Kelsey","Ellorin, Ysabella","Enright, Taylor","Finemel, Annie","Freed, Drake","Friel, Liem","Fulk, Logan","Gomez-Chan, Fabiola","Hacker, Connor","Hansen, Reese","Hines, Nadia","Hussein, Rima","Kendall, Ava","Khanna, Ananya","Krueger, Tessa","Lage, Adeline","Lambo, Dexter","Lara, Diego","Lara, Victor","Leach, Gwendolynn","Lebo, Rachel","Lilly, Genevieve","Lucas, Grae","Maher, Kyle","Martin, Lea","Martinez, Marina","McDonald, Cam'Ron","Mehta, Jhil","Mosolgo, Anabella","Narbaez, Adrien","Nollette, Isabelle","Owens, Richie","Palmer, B J","Partain, Adrian","Petitt, McKenzie","Printz, Dane","Quizon, Ivanna","Rathore, Max","Roan, Dana","Robin, Aidan","Rook, Cassidy","Roscher, Wyatt","Rueter, Rochelle","Rutan, Triston","Sanada, Maia","Schmidt, Thomas","Schmitt, Eliot","Shaft, Isabella","Shepler, Izzy","Silvia, Noah","Spengler, Sascha","Tarbox, Michael","Toyooka, Luke","Uehara, Kierstin","Valdez, Bella","Walts, Benjamin","Watson, Magdalyn","Wenz, Kamryn","Winchester, Sierra","Wright, Jace"
+  "Abraham, John",
+  "Alamares, Miya",
+  "Allen, Britany",
+  "Altura, Leo",
+  "Ayre, Nick",
+  "Bamford, Annabelle",
+  "Barnes, Lily",
+  "Belforte, Bruno",
+  "Besta, Emma",
+  "Biggers, Avery",
+  "Bond, Lulu",
+  "Bunge, Grace",
+  "Cabrera, Zach",
+  "Capelle, Eloise",
+  "Carlile, Zoie",
+  "Carranza, Jasmine",
+  "Chen, Shuyan",
+  "Cheng, Brandon",
+  "Coffin, Autumn",
+  "Cronce, Ivory",
+  "Domenigoni, Kaia",
+  "Fogelmanis, Baylee",
+  "Fowler, Liza",
+  "Frails, Ezekiel",
+  "Francis, Mia",
+  "Garcia, Bri",
+  "Gobel, Jacob",
+  "Heinemann, Andreas",
+  "Hinds, Mia",
+  "Hornell, Payton",
+  "Horyelov, Veronica",
+  "Hudson, Hanna",
+  "Humphries, Sam",
+  "Jagare, Tilde",
+  "Jenkins-Hiscox, Zoe",
+  "Kayler, Sophia",
+  "Kelley-Stephenson, Mercedes",
+  "King, Hunter",
+  "Lyons, Aramis",
+  "Madriaga, Mckenzye",
+  "Mason, Colin",
+  "Mehta, Anika",
+  "Meurisse, Lucas",
+  "Miller, Hannah",
+  "Morrison, Aidan",
+  "Neuman, Caspian",
+  "O'Connor, Keagan",
+  "Olson, Vince",
+  "Parish, Amelia",
+  "Parry, Kris",
+  "Paulk, Haviland",
+  "Perry, Colin",
+  "Queiroz, Nicholas",
+  "Reynolds, Alexa",
+  "Richardson, Emma",
+  "Roberts, Ellie",
+  "Rodenbaugh, Ella",
+  "Roethe, Aspen",
+  "Rutledge, Collin",
+  "Speck, Logan",
+  "Stangle, Aspen",
+  "Suda, Sophia",
+  "Tabor, Alice",
+  "Thebert, Johanna",
+  "Thompson, Ashlynn",
+  "Tiegs, Ursula",
+  "Toner, Grant",
+  "Urtubey, Kaleb",
+  "Van Norman Erickson, Arnica",
+  "Vandehey, Nathan",
+  "Weiner, Jake",
+  "Yang, Sara"
 ].map(s=>s.trim());
 
 /***********************
