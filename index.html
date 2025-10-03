@@ -132,8 +132,8 @@ const DEVICE_LOCK_KEY = 'section.signin.device.locked.name';
 const STORAGE_KEY = 'section.signin.v2';
 
 // Allowed sign-in window (5–6pm local time). Adjust if needed.
-const WINDOW_START_HOUR = 18; // 5pm
-const WINDOW_END_HOUR   = 19; // 6pm (exclusive)
+const WINDOW_START_HOUR = 18; // 6pm
+const WINDOW_END_HOUR   = 19; // 7pm (exclusive)
 
 // Student roster
 const STUDENTS = [
@@ -234,7 +234,7 @@ function renderList(filter=''){
       const now = new Date();
       if(!withinWindow(now)){
         cb.checked = false;
-        alert('Sign‑in is only available 5–6pm.');
+        alert('Sign‑in is only available 6–7pm.');
         return;
       }
 
