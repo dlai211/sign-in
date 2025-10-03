@@ -132,88 +132,17 @@ const DEVICE_LOCK_KEY = 'section.signin.device.locked.name';
 const STORAGE_KEY = 'section.signin.v2';
 
 // Allowed sign-in window (5–6pm local time). Adjust if needed.
-const WINDOW_START_HOUR = 17; // 5pm
-const WINDOW_END_HOUR   = 18; // 6pm (exclusive)
+const WINDOW_START_HOUR = 18; // 5pm
+const WINDOW_END_HOUR   = 19; // 6pm (exclusive)
 
 // Student roster
-// const STUDENTS = [
-//   "Acuna, Alana","Autar, Akash","Barnes, Aj","Bertelsen, Hailey","Bradshaw, Charlie","Cook Diaz, Rowan","Cooper, Mikala","Corcoran, Nick","Craddock, Yun","De Leon, Isaiah","Dennis, Kelsey","Ellorin, Ysabella","Enright, Taylor","Finemel, Annie","Freed, Drake","Friel, Liem","Fulk, Logan","Gomez-Chan, Fabiola","Hacker, Connor","Hansen, Reese","Hines, Nadia","Hussein, Rima","Kendall, Ava","Khanna, Ananya","Krueger, Tessa","Lage, Adeline","Lambo, Dexter","Lara, Diego","Lara, Victor","Leach, Gwendolynn","Lebo, Rachel","Lilly, Genevieve","Lucas, Grae","Maher, Kyle","Martin, Lea","Martinez, Marina","McDonald, Cam'Ron","Mehta, Jhil","Mosolgo, Anabella","Narbaez, Adrien","Nollette, Isabelle","Owens, Richie","Palmer, B J","Partain, Adrian","Petitt, McKenzie","Printz, Dane","Quizon, Ivanna","Rathore, Max","Roan, Dana","Robin, Aidan","Rook, Cassidy","Roscher, Wyatt","Rueter, Rochelle","Rutan, Triston","Sanada, Maia","Schmidt, Thomas","Schmitt, Eliot","Shaft, Isabella","Shepler, Izzy","Silvia, Noah","Spengler, Sascha","Tarbox, Michael","Toyooka, Luke","Uehara, Kierstin","Valdez, Bella","Walts, Benjamin","Watson, Magdalyn","Wenz, Kamryn","Winchester, Sierra","Wright, Jace"
-// ].map(s=>s.trim());
-
 const STUDENTS = [
-  "Abraham, John",
-  "Alamares, Miya",
-  "Allen, Britany",
-  "Altura, Leo",
-  "Ayre, Nick",
-  "Bamford, Annabelle",
-  "Barnes, Lily",
-  "Belforte, Bruno",
-  "Besta, Emma",
-  "Biggers, Avery",
-  "Bond, Lulu",
-  "Bunge, Grace",
-  "Cabrera, Zach",
-  "Capelle, Eloise",
-  "Carlile, Zoie",
-  "Carranza, Jasmine",
-  "Chen, Shuyan",
-  "Cheng, Brandon",
-  "Coffin, Autumn",
-  "Cronce, Ivory",
-  "Domenigoni, Kaia",
-  "Fogelmanis, Baylee",
-  "Fowler, Liza",
-  "Frails, Ezekiel",
-  "Francis, Mia",
-  "Garcia, Bri",
-  "Gobel, Jacob",
-  "Heinemann, Andreas",
-  "Hinds, Mia",
-  "Hornell, Payton",
-  "Horyelov, Veronica",
-  "Hudson, Hanna",
-  "Humphries, Sam",
-  "Jagare, Tilde",
-  "Jenkins-Hiscox, Zoe",
-  "Kayler, Sophia",
-  "Kelley-Stephenson, Mercedes",
-  "King, Hunter",
-  "Lyons, Aramis",
-  "Madriaga, Mckenzye",
-  "Mason, Colin",
-  "Mehta, Anika",
-  "Meurisse, Lucas",
-  "Miller, Hannah",
-  "Morrison, Aidan",
-  "Neuman, Caspian",
-  "O'Connor, Keagan",
-  "Olson, Vince",
-  "Parish, Amelia",
-  "Parry, Kris",
-  "Paulk, Haviland",
-  "Perry, Colin",
-  "Queiroz, Nicholas",
-  "Reynolds, Alexa",
-  "Richardson, Emma",
-  "Roberts, Ellie",
-  "Rodenbaugh, Ella",
-  "Roethe, Aspen",
-  "Rutledge, Collin",
-  "Speck, Logan",
-  "Stangle, Aspen",
-  "Suda, Sophia",
-  "Tabor, Alice",
-  "Thebert, Johanna",
-  "Thompson, Ashlynn",
-  "Tiegs, Ursula",
-  "Toner, Grant",
-  "Urtubey, Kaleb",
-  "Van Norman Erickson, Arnica",
-  "Vandehey, Nathan",
-  "Weiner, Jake",
-  "Yang, Sara"
+  "Acuna, Alana","Autar, Akash","Barnes, Aj","Bertelsen, Hailey","Bradshaw, Charlie","Cook Diaz, Rowan","Cooper, Mikala","Corcoran, Nick","Craddock, Yun","De Leon, Isaiah","Dennis, Kelsey","Ellorin, Ysabella","Enright, Taylor","Finemel, Annie","Freed, Drake","Friel, Liem","Fulk, Logan","Gomez-Chan, Fabiola","Hacker, Connor","Hansen, Reese","Hines, Nadia","Hussein, Rima","Kendall, Ava","Khanna, Ananya","Krueger, Tessa","Lage, Adeline","Lambo, Dexter","Lara, Diego","Lara, Victor","Leach, Gwendolynn","Lebo, Rachel","Lilly, Genevieve","Lucas, Grae","Maher, Kyle","Martin, Lea","Martinez, Marina","McDonald, Cam'Ron","Mehta, Jhil","Mosolgo, Anabella","Narbaez, Adrien","Nollette, Isabelle","Owens, Richie","Palmer, B J","Partain, Adrian","Petitt, McKenzie","Printz, Dane","Quizon, Ivanna","Rathore, Max","Roan, Dana","Robin, Aidan","Rook, Cassidy","Roscher, Wyatt","Rueter, Rochelle","Rutan, Triston","Sanada, Maia","Schmidt, Thomas","Schmitt, Eliot","Shaft, Isabella","Shepler, Izzy","Silvia, Noah","Spengler, Sascha","Tarbox, Michael","Toyooka, Luke","Uehara, Kierstin","Valdez, Bella","Walts, Benjamin","Watson, Magdalyn","Wenz, Kamryn","Winchester, Sierra","Wright, Jace"
 ].map(s=>s.trim());
+
+// const STUDENTS = [
+//   "Abraham, John", "Alamares, Miya", "Allen, Britany", "Altura, Leo", "Ayre, Nick", "Bamford, Annabelle", "Barnes, Lily", "Belforte, Bruno", "Besta, Emma", "Biggers, Avery", "Bond, Lulu", "Bunge, Grace", "Cabrera, Zach", "Capelle, Eloise", "Carlile, Zoie", "Carranza, Jasmine", "Chen, Shuyan", "Cheng, Brandon", "Coffin, Autumn", "Cronce, Ivory", "Domenigoni, Kaia", "Fogelmanis, Baylee", "Fowler, Liza", "Frails, Ezekiel", "Francis, Mia", "Garcia, Bri", "Gobel, Jacob", "Heinemann, Andreas", "Hinds, Mia", "Hornell, Payton", "Horyelov, Veronica", "Hudson, Hanna", "Humphries, Sam", "Jagare, Tilde", "Jenkins-Hiscox, Zoe", "Kayler, Sophia", "Kelley-Stephenson, Mercedes", "King, Hunter", "Lyons, Aramis", "Madriaga, Mckenzye", "Mason, Colin", "Mehta, Anika", "Meurisse, Lucas", "Miller, Hannah", "Morrison, Aidan", "Neuman, Caspian", "O'Connor, Keagan", "Olson, Vince", "Parish, Amelia", "Parry, Kris", "Paulk, Haviland", "Perry, Colin", "Queiroz, Nicholas", "Reynolds, Alexa", "Richardson, Emma", "Roberts, Ellie", "Rodenbaugh, Ella", "Roethe, Aspen", "Rutledge, Collin", "Speck, Logan", "Stangle, Aspen", "Suda, Sophia", "Tabor, Alice", "Thebert, Johanna", "Thompson, Ashlynn", "Tiegs, Ursula", "Toner, Grant", "Urtubey, Kaleb", "Van Norman Erickson, Arnica", "Vandehey, Nathan", "Weiner, Jake", "Yang, Sara"
+// ].map(s=>s.trim());
 
 /***********************
  * STORAGE
